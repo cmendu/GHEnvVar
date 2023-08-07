@@ -11,7 +11,7 @@ jobs:
     environment: testing
     env:
       MONGODB_CLUSTER_ADDRESS: cluster0.wc3kqzo.mongodb.net
-      MONGODB_USERNAME: pushpa
+      MONGODB_USERNAME: ${{ secrets.MONGODB_USERNAME }}
       MONGODB_PASSWORD: pushpatherule
       PORT: 8080
     runs-on: ubuntu-latest
