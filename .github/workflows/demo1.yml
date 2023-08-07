@@ -1,18 +1,41 @@
-name: Events Demo 1
-on: ...
+name: Deploy website
+on:
+  push:
+    branches:
+      - main
+env:
+  MONGO_DB_NAME: gha_demo
 jobs:
-  deploy:
+  test:
+  environment: testing
+    env:
+      MONGODB_CLUSTER_ADDRESS: cluster0.wc3kqzo.mongodb.net
+      MONGODB_USERNAME: pushpa
+      MONGODB_PASSWORD: pushpatherule
+      PORT: 8080
     runs-on: ubuntu-latest
     steps:
-      - name: Output event data
-        run: echo "${{ toJSON(github.event) }}"
       - name: Get code
         uses: actions/checkout@v3
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: deps-node-modules-${{ hashFiles('**/package-lock.json') }}
       - name: Install dependencies
         run: npm ci
+      - name: Run server
+        run: npm start & npx wait-on http://127.0.0.1:$PORT
       - name: Test code
-        run: npm run test
-      - name: Build code
-        run: npm run build
-      - name: Deploy project
-        run: echo "Deploying..."
+        run: npm test
+      - name: Output information
+        run: echo "MONGODB_USERNAME: {{ env.MONGODB_USERNAME }}"
+  
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Output information
+        run: |        
+         echo "MONGODB_USERNAME: {{ env.MONGODB_USERNAME }}"
+         echo "MONGO_DB_NAME: {{ env.MONGO_DB_NAME }}"
